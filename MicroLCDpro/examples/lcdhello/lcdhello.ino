@@ -46,11 +46,11 @@ long lcount = 0;
 void loop()
 {
   if (wait < 500) wait += 50; else wait = 2;
-  for ( int ii = 1; ii < 1; ii++) {
+  for ( int ii = 1; ii < 8; ii++) {
     lcd.clear();
-    lcd.setCursor(40 + (ii * 2), (ii * 4));
+    lcd.setCursor(5 + (ii * 8), 1);
     lcd.draw(smile, 48, 48);
-    delay(wait);
+    delay(wait/3);
   }
   delay(wait);
   lcd.clear();
