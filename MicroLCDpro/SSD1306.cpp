@@ -1,12 +1,15 @@
 #include <avr/pgmspace.h>
-//#include <util/delay.h>
+#include <util/delay.h>
 #include <stdlib.h>
 #include <Wire.h>
 #include "SSD1306.h"
 
+int8_t rst_RST=0; //BUGBUG
+
 SSD1306::SSD1306(int8_t SCLK, int8_t DC, int8_t RST, int8_t CS) {
   cs = CS;
   rst = RST;
+  rst_RST = RST;
   dc = DC;
   sclk = SCLK;
 }
@@ -23,13 +26,16 @@ void SSD1306::begin(uint8_t vccstate, uint8_t i2caddr) {
 
 
   // set pin directions
-    // I2C Init
-    Wire.begin(); // Is this the right place for this?
-
   // Setup reset pin direction (used by both SPI and I2C)
   pinMode(rst, OUTPUT);
+
+
+  // I2C Init
+    Wire.begin(); // Is this the right place for this?
+
   digitalWrite(rst, HIGH);
   // VDD (3.3V) goes high at start, lets just chill for a ms
+
   delay(1);
   // bring reset low
   digitalWrite(rst, LOW);
@@ -37,6 +43,8 @@ void SSD1306::begin(uint8_t vccstate, uint8_t i2caddr) {
   delay(10);
   // bring out of reset
   digitalWrite(rst, HIGH);
+
+  
   // turn on VCC (9V?)
    #if defined SSD1306_128_32
     // Init sequence for 128x32 OLED module
@@ -71,6 +79,7 @@ void SSD1306::begin(uint8_t vccstate, uint8_t i2caddr) {
     ssd1306_command(SSD1306_DISPLAYALLON_RESUME);           // 0xA4
     ssd1306_command(SSD1306_NORMALDISPLAY);                 // 0xA6
   #endif
+
 
   #if defined SSD1306_128_64
     // Init sequence for 128x64 OLED module
@@ -110,6 +119,7 @@ void SSD1306::begin(uint8_t vccstate, uint8_t i2caddr) {
   #endif
 
   ssd1306_command(SSD1306_DISPLAYON);//--turn on oled panel
+
 
   // clear screen
     delay(5);

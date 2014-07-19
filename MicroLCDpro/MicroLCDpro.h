@@ -15,7 +15,7 @@
   #define WIRE_WRITE Wire.send
 #endif
 
-#define MEMORY_SAVING
+// #define MEMORY_SAVING
 
 typedef enum {
     FONT_SIZE_SMALL = 0,
