@@ -625,36 +625,35 @@ void LCD_SSD1306::clearLine(byte line)
 
 void LCD_SSD1306::clear(byte x, byte y, byte width, byte height)
 {
-    ssd1306_command(SSD1306_SETLOWCOLUMN | 0x0);  // low col = 0
-    ssd1306_command(SSD1306_SETHIGHCOLUMN | 0x0);  // hi col = 0
-    ssd1306_command(SSD1306_SETSTARTLINE | 0x0); // line #0
-
-    height >>= 3;
-    width >>= 3;
-    y >>= 3;
+    ssd1306_command(0x21);  // base column address for SSD1306
+    ssd1306_command(0);     // Column start address (0 = reset)
+    ssd1306_command(127);   // Column end address (127 = reset)
+    
+    ssd1306_command(0x22);  // base page address for SSD1306
+    ssd1306_command(0);     // Page start address (0 = reset)
+    ssd1306_command((SSD1306_LCDHEIGHT == 64) ? 7 : 3);
+    
 #ifdef TWBR
     uint8_t twbrbackup = TWBR;
     TWBR = 18; // upgrade to 400KHz!
 #endif
-    for (byte i = 0; i < height; i++) {
-      // send a bunch of data in one xmission
-        ssd1306_command(0xB0 + i + y);//set page address
-        ssd1306_command(x & 0xf);//set lower column address
-        ssd1306_command(0x10 | (x >> 4));//set higher column address
-
-        for(byte j = 0; j < 8; j++){
-            Wire.beginTransmission(_i2caddr);
-            WIRE_WRITE(0x40);
-            for (byte k = 0; k < width; k++) {
-                WIRE_WRITE(0);
-            }
-            Wire.endTransmission();
+    
+    for (uint16_t i=0; i<(SSD1306_LCDWIDTH*SSD1306_LCDHEIGHT/8); i++) {
+        // send a bunch of data in one xmission
+        Wire.beginTransmission(_i2caddr);
+        Wire.write(0x40);
+        for(uint8_t x = 0; x < 16; x++) {
+            Wire.write(0);
         }
+        i = i + 14;
+        Wire.endTransmission();
     }
+    
 #ifdef TWBR
     TWBR = twbrbackup;
 #endif
-    setCursor(0, 0);
+    
+    setCursor(0,0);
 }
 
 void LCD_SSD1306::setContrast(byte Contrast)
